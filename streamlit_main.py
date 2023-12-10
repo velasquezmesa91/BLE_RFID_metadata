@@ -95,11 +95,11 @@ with tab2:
                                 )
 
     elif tipo_dispositivos == "RFID + BLE":
-        indexes = [np.ceil(x/3) for x in range(1,10)]
+        indexes = [np.ceil(x/3) for x in range(1,1681)]
         df = pd.DataFrame(
             {"index":indexes,
-            "Tipo Dispositivo":["RFID","BLE","RFID"]*3,
-            "Serial": [None]*9,
+            "Tipo Dispositivo":["RFID","BLE","RFID"]*560,
+            "Serial": [None]*1680,
             }
                             )
         edited_df = st.data_editor(
@@ -141,11 +141,11 @@ with tab2:
             rfid_unico =final_df.loc[final_df["Tipo Dispositivo"] == "RFID","Serial"].unique()
             ble_unico = final_df.loc[final_df["Tipo Dispositivo"] == "BLE","Serial"].unique()
 
-            if (tamaño == "60x40x25") & (len(rfid_unico)!=3):
+            if (tamaño == "60x40x25") & (len(rfid_unico)!=210):
                 st.error(f"Hay {len(rfid_unico)} dispositivos RFID registrados, una estiba de tamaño {tamaño} contiene 210 canastillas, compruebe nuevamente el registro")
             elif (tamaño == "30x40x15") & (len(rfid_unico)!=560):
                 st.error(f"Hay {len(rfid_unico)} dispositivos RFID registrados, una estiba de tamaño {tamaño} contiene 560 canastillas, compruebe nuevamente el registro")
-            elif (tamaño == "60x40x25") & (len(ble_unico)!=3):
+            elif (tamaño == "60x40x25") & (len(ble_unico)!=210):
                 st.error(f"Hay {len(ble_unico)} dispositivos BLE registrados, una estiba de tamaño {tamaño} contiene 210 canastillas, compruebe nuevamente el registro")
             elif (tamaño == "30x40x15") & (len(ble_unico)!=560):
                 st.error(f"Hay {len(ble_unico)} dispositivos BLE registrados, una estiba de tamaño {tamaño} contiene 560 canastillas, compruebe nuevamente el registro")
