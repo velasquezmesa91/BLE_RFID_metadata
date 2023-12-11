@@ -3,6 +3,8 @@ import pandas as pd
 from streamlit import session_state as ss
 import numpy as np
 
+from streamlit_js_eval import streamlit_js_eval
+
 #Session States
 if 'page_title' not in ss:
     ss["page_title"] = "Formulario de registro metadatos" 
@@ -134,35 +136,42 @@ with tab2:
         elif any(lon_ble):
             st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {ble.dropna().loc[lon_ble,"Serial"].values} NO corresponden a un serial BLE, corríjalos antes de continuar con el escaneo")
 
-        revisar = st.button("Revisar Datos", type="primary")
+        bcol1, bcol2 = st.columns(2)
+        with bcol1:
+            revisar = st.button("Revisar Datos", type="primary")
 
-        if revisar:
-            final_df = edited_df.dropna()
-            rfid_unico =final_df.loc[final_df["Tipo Dispositivo"] == "RFID","Serial"].unique()
-            ble_unico = final_df.loc[final_df["Tipo Dispositivo"] == "BLE","Serial"].unique()
+            if revisar:
+                final_df = edited_df.dropna()
+                rfid_unico =final_df.loc[final_df["Tipo Dispositivo"] == "RFID","Serial"].unique()
+                ble_unico = final_df.loc[final_df["Tipo Dispositivo"] == "BLE","Serial"].unique()
 
-            if (tamaño == "60x40x25") & (len(rfid_unico)!=210):
-                st.error(f"Hay {len(rfid_unico)} dispositivos RFID registrados, una estiba de tamaño {tamaño} contiene 210 canastillas, compruebe nuevamente el registro")
-            elif (tamaño == "30x40x15") & (len(rfid_unico)!=560):
-                st.error(f"Hay {len(rfid_unico)} dispositivos RFID registrados, una estiba de tamaño {tamaño} contiene 560 canastillas, compruebe nuevamente el registro")
-            elif (tamaño == "60x40x25") & (len(ble_unico)!=210):
-                st.error(f"Hay {len(ble_unico)} dispositivos BLE registrados, una estiba de tamaño {tamaño} contiene 210 canastillas, compruebe nuevamente el registro")
-            elif (tamaño == "30x40x15") & (len(ble_unico)!=560):
-                st.error(f"Hay {len(ble_unico)} dispositivos BLE registrados, una estiba de tamaño {tamaño} contiene 560 canastillas, compruebe nuevamente el registro")
-            else:
-                st.success("¡Ha pasado la revisión inicial! Descargue el archivo y envíelo al supervisor para revisión")
-                st.caption("Por favor revise que la información en el hablador sea correcta y que haya registrado correctamente los códigos de las canastillas antes de descargar el archivo")
-                @st.cache_data
-                def convert_df(df):
-                    return df.to_csv(index=False).encode('utf-8')
-                data = convert_df(final_df)
+                if (tamaño == "60x40x25") & (len(rfid_unico)!=210):
+                    st.error(f"Hay {len(rfid_unico)} dispositivos RFID registrados, una estiba de tamaño {tamaño} contiene 210 canastillas, compruebe nuevamente el registro")
+                elif (tamaño == "30x40x15") & (len(rfid_unico)!=560):
+                    st.error(f"Hay {len(rfid_unico)} dispositivos RFID registrados, una estiba de tamaño {tamaño} contiene 560 canastillas, compruebe nuevamente el registro")
+                elif (tamaño == "60x40x25") & (len(ble_unico)!=210):
+                    st.error(f"Hay {len(ble_unico)} dispositivos BLE registrados, una estiba de tamaño {tamaño} contiene 210 canastillas, compruebe nuevamente el registro")
+                elif (tamaño == "30x40x15") & (len(ble_unico)!=560):
+                    st.error(f"Hay {len(ble_unico)} dispositivos BLE registrados, una estiba de tamaño {tamaño} contiene 560 canastillas, compruebe nuevamente el registro")
+                else:
+                    st.success("¡Ha pasado la revisión inicial! Descargue el archivo y envíelo al supervisor para revisión")
+                    st.caption("Por favor revise que la información en el hablador sea correcta y que haya registrado correctamente los códigos de las canastillas antes de descargar el archivo")
+                    @st.cache_data
+                    def convert_df(df):
+                        return df.to_csv(index=False).encode('utf-8')
+                    data = convert_df(final_df)
 
-                st.download_button(
-                    label="Descargar archivo",
-                    data=data,
-                    file_name=f"{lote} {responsable1}-{responsable2}.csv",
-                    mime='text/csv',
-                )
+                    descargar=st.download_button(
+                        label="Descargar archivo",
+                        data=data,
+                        file_name=f"{lote} {responsable1}-{responsable2}.csv",
+                        mime='text/csv',
+                    )
+        with bcol2:
+            if st.button("Comenzar registro nuevo"):
+                streamlit_js_eval(js_expressions="parent.window.location.reload()")
+            st.caption("Este botón eliminará todos los datos. Asegúrese de haber descargado el archivo y que este no tenga errores antes de presionarlo")
+          
 
 
 
