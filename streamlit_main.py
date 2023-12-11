@@ -132,7 +132,8 @@ with tab2:
             st.error(f"¡HAY VALORES DUPLICADOS! Los valores {list(duplicados_ble[duplicados_ble].index)} se han duplicado, corrijalos antes se seguir el escaneo")
         
         if any(lon_rfid):
-            st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {rfid.dropna().loc[lon_rfid,"Serial"].values} NO corresponden a un serial RFID, corríjalos antes de continuar con el escaneo")
+            error_lon_rfid = rfid.dropna().loc[lon_rfid,"Serial"].values
+            st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {error_lon_rfid } NO corresponden a un serial RFID, corríjalos antes de continuar con el escaneo")
         elif any(lon_ble):
             st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {ble.dropna().loc[lon_ble,"Serial"].values} NO corresponden a un serial BLE, corríjalos antes de continuar con el escaneo")
 
