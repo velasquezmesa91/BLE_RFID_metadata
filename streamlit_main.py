@@ -135,7 +135,8 @@ with tab2:
             error_lon_rfid = rfid.dropna().loc[lon_rfid,"Serial"].values
             st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {error_lon_rfid } NO corresponden a un serial RFID, corríjalos antes de continuar con el escaneo")
         elif any(lon_ble):
-            st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {ble.dropna().loc[lon_ble,"Serial"].values} NO corresponden a un serial BLE, corríjalos antes de continuar con el escaneo")
+            error_lon_ble = ble.dropna().loc[lon_ble,"Serial"].values
+            st.error(f"¡HAY VALORES ERRÓNEOS! Los valores {error_lon_ble} NO corresponden a un serial BLE, corríjalos antes de continuar con el escaneo")
 
         bcol1, bcol2 = st.columns(2)
         with bcol1:
