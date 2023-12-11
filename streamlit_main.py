@@ -158,6 +158,13 @@ with tab2:
                 else:
                     st.success("¡Ha pasado la revisión inicial! Descargue el archivo y envíelo al supervisor para revisión")
                     st.caption("Por favor revise que la información en el hablador sea correcta y que haya registrado correctamente los códigos de las canastillas antes de descargar el archivo")
+                    final_df["tipo molde"] = tipo_molde
+                    final_df["tamano"] = tamaño 
+                    final_df["color"] = color 
+                    final_df["equipo provisioning"] = equipo
+                    final_df["fecha"] = pd.to_datetime("today")
+                    final_df["ubicacion"] = ciudad 
+                    final_df["lote"] = lote
                     @st.cache_data
                     def convert_df(df):
                         return df.to_csv(index=False).encode('utf-8')
