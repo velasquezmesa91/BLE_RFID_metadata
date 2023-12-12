@@ -12,40 +12,47 @@ with tab1:
         df1 = pd.read_excel(arch1, skiprows=4)
         df1 = df1.loc[:,["ID","Device Descr",	"Device ID"]]
         df1.dropna(subset="Device ID", inplace=True)
-        rfid_ind = df1["Device Descr"] == "RFID Tag"
-        ble_ind = df1["Device Descr"] == "GPS Device"
+        rfid = df1[df1["Device Descr"] == "RFID Tag"]
+        ble = df1[df1["Device Descr"] == "GPS Device"]
 
-        BLE_unico = len(df1.loc[ble_ind,"Device ID"].unique())
-        RFID_unico = len(df1.loc[rfid_ind,"Device ID"].unique())
-        BLE_duplicado = (df1.loc[ble_ind,"Device ID"].value_counts() > 1).sum()
-        RFID_duplicado = (df1.loc[rfid_ind,"Device ID"].value_counts() > 2).sum()
-        BLE_long = df1.loc[ble_ind,"Device ID"].str.len().unique()
-        RFID_long = df1.loc[rfid_ind,"Device ID"].str.len().unique()
-
+        BLE_unico = len(ble["Device ID"].unique())
+        RFID_unico = len(rfid["Device ID"].unique())
+        BLE_duplicado = (ble["Device ID"].value_counts() > 1)
+        RFID_duplicado = (rfid["Device ID"].value_counts() > 2)
+        BLE_long = ble["Device ID"].str.len().unique()
+        RFID_long = rfid["Device ID"].str.len().unique()
+        errores=0
         if BLE_unico !=210:
+            errores+=1
             st.error(f"Hay {BLE_unico} BLE registrados y deberian ser 210, revise el archivo")
         if RFID_unico != 210:
-            st.error(f"Hay {RFID_unico} RFIS registrados y deberian ser 210, revise el archivo")
-        if BLE_duplicado >0:
+            errores+=1
+            st.error(f"Hay {RFID_unico} RFID registrados y deberian ser 210, revise el archivo")
+        if any(BLE_duplicado):
+            errores+=1
             st.error("Hay dispositivos BLE duplicados, revise el archivo")
-            duplicados_ble = df1.loc[(df1.loc[ble_ind,"Device ID"].value_counts() > 1),"Device ID"]
-            st.write(f"Duplicados:{duplicados_ble}")
-        if RFID_duplicado >0:
+            st.table(BLE_duplicado[BLE_duplicado].index) 
+        if any(RFID_duplicado):
+            errores+=1
             st.error("Hay dispositivos RFID duplicados, revise el archivo")
-            duplicados_rfid = df1.loc[(df1.loc[rfid_ind,"Device ID"].value_counts() > 2),"Device ID"]
-            st.write(f"Duplicados:{duplicados_rfid}")
+            st.table(RFID_duplicado[RFID_duplicado].index)
         if len(BLE_long) >1:
+            errores+=1
             if (BLE_long[0]!=7 )| (BLE_long[1]!=7):
                 st.error("Hay un serial que no corresponde a BLE, revise el archivo")
-                mala_lon = df1.loc[df1.loc[ble_ind,"Device ID"].str.len() !=7,"Device ID"]
-                st.write(mala_lon)
+                #mala_lon = df1.loc[df1.loc[ble_ind,"Device ID"].str.len() !=7,"Device ID"]
+                #st.write(mala_lon)
         if len(RFID_long) >1:
+            errores+=1
             if (BLE_long[0]!=27 )| (BLE_long[1]!=27):
                 st.error("Hay un serial que no corresponde a RFID, revise el archivo")
-                mala_lon_rfid = df1.loc[df1.loc[rfid_ind,"Device ID"].str.len() !=27,"Device ID"]
-                st.write(mala_lon_rfid)
+                #mala_lon_rfid = df1.loc[df1.loc[rfid_ind,"Device ID"].str.len() !=27,"Device ID"]
+                #st.write(mala_lon_rfid)
+        if errores==0:
+            st.success("Ha pasado los chequeos iniciales, cargue el archivo a la carpeta correspondiente")          
         else:
-            st.success("Ha pasado los chequeos iniciales, cargue el archivo a la carpeta correspondiente")
+            st.error(f"TIENE {errores} ERRORES, revise el archivo nuevamente")
+            
 with tab2:
     arch2 = st.file_uploader("Cargue los dos archivos", accept_multiple_files=True)
     if arch2:
