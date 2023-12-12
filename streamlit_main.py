@@ -26,7 +26,7 @@ def revision():
 
 #Sidebar
     
-
+st.sidebar.text_input("Registro")
 
 st.title("Formulario de Registro Metadatos" )
 tab1, tab2 = st.tabs(["Hablador","Registro de datos"])
