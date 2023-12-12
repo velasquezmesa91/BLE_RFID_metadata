@@ -24,22 +24,22 @@ with tab1:
 
         if BLE_unico !=210:
             st.error(f"Hay {BLE_unico} BLE registrados y deberian ser 210, revise el archivo")
-        elif RFID_unico != 210:
+        if RFID_unico != 210:
             st.error(f"Hay {RFID_unico} RFIS registrados y deberian ser 210, revise el archivo")
-        elif BLE_duplicado >0:
+        if BLE_duplicado >0:
             st.error("Hay dispositivos BLE duplicados, revise el archivo")
             duplicados_ble = df1.loc[(df1.loc[ble_ind,"Device ID"].value_counts() > 1),"Device ID"]
             st.write(f"Duplicados:{duplicados_ble}")
-        elif RFID_duplicado >0:
+        if RFID_duplicado >0:
             st.error("Hay dispositivos RFID duplicados, revise el archivo")
             duplicados_rfid = df1.loc[(df1.loc[rfid_ind,"Device ID"].value_counts() > 2),"Device ID"]
             st.write(f"Duplicados:{duplicados_rfid}")
-        elif len(BLE_long) >1:
+        if len(BLE_long) >1:
             if (BLE_long[0]!=7 )| (BLE_long[1]!=7):
                 st.error("Hay un serial que no corresponde a BLE, revise el archivo")
                 mala_lon = df1.loc[df1.loc[ble_ind,"Device ID"].str.len() !=7,"Device ID"]
                 st.write(mala_lon)
-        elif len(RFID_long) >1:
+        if len(RFID_long) >1:
             if (BLE_long[0]!=27 )| (BLE_long[1]!=27):
                 st.error("Hay un serial que no corresponde a RFID, revise el archivo")
                 mala_lon_rfid = df1.loc[df1.loc[rfid_ind,"Device ID"].str.len() !=27,"Device ID"]
@@ -77,8 +77,8 @@ with tab2:
         if tm[0]!=420:
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
 
-            st.write(f"RFID en archivo 1 y no en 2:{rfid1[~rfid1.isin(rfid2)]}")
-            st.write(f"RFID en archivo 2 y no en 1:{rfid2[~rfid2.isin(rfid1)]}")
+            st.table(f"RFID en archivo 1 y no en 2:{rfid1[~rfid1.isin(rfid2)]}")
+            st.table(f"RFID en archivo 2 y no en 1:{rfid2[~rfid2.isin(rfid1)]}")
 
         elif df_join.shape[0] !=210:
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
