@@ -46,9 +46,46 @@ with tab1:
                 st.write(mala_lon_rfid)
         else:
             st.success("Ha pasado los chequeos iniciales, cargue el archivo a la carpeta correspondiente")
+with tab2:
+    arch2 = st.file_uploader("Cargue los dos archivos", accept_multiple_files=True)
+    if arch2:
+        df_t1 = pd.read_excel(arch2[0], skiprows=4)
+        df_t2 = pd.read_excel(arch2[0], skiprows=4)
+        df_t1 = df_t1.loc[:,["ID","Device Descr",	"Device ID"]]
+        df_t2 = df_t2.loc[:,["ID","Device Descr",	"Device ID"]]
+        df_t1.dropna(subset="Device ID", inplace=True)
+        df_t2.dropna(subset="Device ID", inplace=True)
+        rfid1 = df_t1[df_t1["Device Descr"] == "RFID Tag"]
+        ble1 = df_t1[df_t1["Device Descr"] == "GPS Device"]
+        rfid2 = df_t2[df_t2["Device Descr"] == "RFID Tag"]
+        ble2 = df_t2[df_t2["Device Descr"] == "GPS Device"]
 
-        #RFID_bad = bad_serials.ID.isin(df1.loc[rfid_ind,"Device ID"]).sum()
-        #print(f"Numero de Seriales malos estiba 1: {RFID_bad}")
+        #Union
+        df12 = df_t1.drop_duplicates(subset=("Device ID"))
+        df22 = df_t2.drop_duplicates(subset=("Device ID"))
+        tm = df12.merge(df22, on="Device ID", how="inner").shape
+
+        #Join
+        
+        df12 = df12.pivot(index="ID", columns="Device Descr").droplevel(level=0, axis=1)
+        df22 = df22.pivot(index="ID", columns="Device Descr").droplevel(level=0, axis=1)
+
+        df12["key"] = df12["GPS Device"] + "--" + df12["RFID Tag"]
+        df22["key"] = df22["GPS Device"] + "--" + df22["RFID Tag"]
+
+        df_join = df12.merge(df22, on="key", how="inner",suffixes=["","_R"])
+        if tm[0]!=420:
+            st.error("Los archivos tienen diferentes seriales, revise los archivos")
+
+            st.write(f"RFID en archivo 1 y no en 2:{rfid1[~rfid1.isin(rfid2)]}")
+            st.write(f"RFID en archivo 2 y no en 1:{rfid2[~rfid2.isin(rfid1)]}")
+
+        elif df_join.shape[0] !=210:
+            st.error("Los archivos tienen diferentes seriales, revise los archivos")
+        else:
+            st.success("Ambos archivos estan correctos!")
+
+
 
 
 
