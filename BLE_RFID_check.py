@@ -84,6 +84,17 @@ with tab2:
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
         else:
             st.success("Ambos archivos estan correctos!")
+            @st.cache_data
+            def convert_df(df):
+                return df.to_csv(index=False).encode('utf-8')
+            data = convert_df(df_join["GPS Device"])
+
+            descargar=st.download_button(
+                label="Descargar archivo",
+                data=data,
+                file_name=f"SerialesBLE.csv",
+                mime='text/csv',
+            )
 
 
 
