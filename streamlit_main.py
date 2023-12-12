@@ -181,19 +181,3 @@ with tab2:
                 streamlit_js_eval(js_expressions="parent.window.location.reload()")
             st.caption("Este botón eliminará todos los datos. Asegúrese de haber descargado el archivo y que este no tenga errores antes de presionarlo")
           
-
-
-
-
-        
-
-
-
-    
-           
-
-        
-
-
-#favorite_command = edited_df.loc[edited_df["rating"].idxmax()]["command"]
-#st.markdown(f"Your favorite command is **{favorite_command}** 🎈")
