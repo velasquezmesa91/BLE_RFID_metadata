@@ -60,15 +60,15 @@ with tab2:
     arch2 = st.file_uploader("Cargue los dos archivos", accept_multiple_files=True)
     if arch2:
         df_t1 = pd.read_excel(arch2[0], skiprows=4)
-        df_t2 = pd.read_excel(arch2[0], skiprows=4)
+        df_t2 = pd.read_excel(arch2[1], skiprows=4)
         df_t1 = df_t1.loc[:,["ID","Device Descr",	"Device ID"]]
         df_t2 = df_t2.loc[:,["ID","Device Descr",	"Device ID"]]
         df_t1.dropna(subset="Device ID", inplace=True)
         df_t2.dropna(subset="Device ID", inplace=True)
-        rfid1 = df_t1[df_t1["Device Descr"] == "RFID Tag"]
-        ble1 = df_t1[df_t1["Device Descr"] == "GPS Device"]
-        rfid2 = df_t2[df_t2["Device Descr"] == "RFID Tag"]
-        ble2 = df_t2[df_t2["Device Descr"] == "GPS Device"]
+        rfid1 = df_t1.loc[df_t1["Device Descr"] == "RFID Tag","Device ID"]
+        ble1 = df_t1.loc[df_t1["Device Descr"] == "GPS Device", "Device ID"]
+        rfid2 = df_t2.loc[df_t2["Device Descr"] == "RFID Tag", "Device ID"]
+        ble2 = df_t2.loc[df_t2["Device Descr"] == "GPS Device", "Device ID"]
 
         #Union
         df12 = df_t1.drop_duplicates(subset=("Device ID"))
@@ -84,14 +84,19 @@ with tab2:
         df22["key"] = df22["GPS Device"] + "--" + df22["RFID Tag"]
 
         df_join = df12.merge(df22, on="key", how="inner",suffixes=["","_R"])
+
         if tm[0]!=420:
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
 
-            st.table(f"RFID en archivo 1 y no en 2:{rfid1[~rfid1.isin(rfid2)]}")
-            st.table(f"RFID en archivo 2 y no en 1:{rfid2[~rfid2.isin(rfid1)]}")
+            st.write(f"RFID en archivo 1 y no en 2: {rfid1[~rfid1.isin(rfid2)].unique()}")
+            st.write(f"RFID en archivo 2 y no en 1: {rfid2[~rfid2.isin(rfid1)].unique()}")
+            st.write(f"BLE en archivo 1 y no en 2: {ble1[~ble1.isin(ble2)].unique()}")
+            st.write(f"BLE en archivo 2 y no en 1: {ble2[~ble2.isin(ble1)].unique()}")
 
         elif df_join.shape[0] !=210:
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
+            st.write(f"RFID en archivo 1 y no en 2: {rfid1[~rfid1.isin(rfid2)].values}")
+            st.write(f"RFID en archivo 2 y no en 1: {rfid2[~rfid2.isin(rfid1)].values}")
         else:
             st.success("Ambos archivos estan correctos!")
             @st.cache_data
