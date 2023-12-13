@@ -31,23 +31,26 @@ with tab1:
         if any(BLE_duplicado):
             errores+=1
             st.error("Hay dispositivos BLE duplicados, revise el archivo")
-            st.table(BLE_duplicado[BLE_duplicado].index) 
+            st.write(f"**Dispositivo(s) duplicado(s)**: {BLE_duplicado[BLE_duplicado].index[0]}")
         if any(RFID_duplicado):
             errores+=1
             st.error("Hay dispositivos RFID duplicados, revise el archivo")
-            st.table(RFID_duplicado[RFID_duplicado].index)
+            st.write(f"**Dispositivo(s) duplicado(s)**: {RFID_duplicado[RFID_duplicado].index[0]}")
         if len(BLE_long) >1:
             errores+=1
             if (BLE_long[0]!=7 )| (BLE_long[1]!=7):
                 st.error("Hay un serial que no corresponde a BLE, revise el archivo")
-                #mala_lon = df1.loc[df1.loc[ble_ind,"Device ID"].str.len() !=7,"Device ID"]
-                #st.write(mala_lon)
+                ble_wrong_len = [x for x in BLE_long if x != 7][0]
+                ble_wrong_len =ble[ble["Device ID"].str.len() ==ble_wrong_len]
+                st.dataframe(ble_wrong_len)
         if len(RFID_long) >1:
             errores+=1
-            if (BLE_long[0]!=27 )| (BLE_long[1]!=27):
+            if (RFID_long[0]!=27 )| (RFID_long[1]!=27):
                 st.error("Hay un serial que no corresponde a RFID, revise el archivo")
-                #mala_lon_rfid = df1.loc[df1.loc[rfid_ind,"Device ID"].str.len() !=27,"Device ID"]
-                #st.write(mala_lon_rfid)
+                rfid_wrong_len = [x for x in RFID_long if x != 27][0]
+                rfid_wrong_len =rfid[rfid["Device ID"].str.len() ==rfid_wrong_len]
+                st.dataframe(rfid_wrong_len)
+
         if errores==0:
             st.success("Ha pasado los chequeos iniciales, cargue el archivo a la carpeta correspondiente")          
         else:
