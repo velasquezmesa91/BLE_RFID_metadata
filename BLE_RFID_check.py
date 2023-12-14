@@ -134,12 +134,12 @@ with tab3:
         if len(df_rfid2["Serial"].str.len().unique())>1:
             errores+=1
             st.error("Hay seriales que no corresponden en el archivo 2 a RFID. revise el archivo")
-        if df_rfid1.shape[0] != 560:
+        if len(df_rfid1.Serial.unique()) != 560:
             errores+=1
-            st.error(f"Hay {df_rfid1.shape[0]} seriales únicos en el archivo 1, deberian haber 560, revise el archivo")
-        if df_rfid2.shape[1] != 560:
+            st.error(f"Hay {len(df_rfid1.Serial.unique())} seriales únicos en el archivo 1, deberian haber 560, revise el archivo")
+        if len(df_rfid2.Serial.unique()) != 560:
             errores+=1
-            st.error(f"Hay {df_rfid2.shape[0]} seriales únicos en el archivo 2, deberian haber 560, revise el archivo")   
+            st.error(f"Hay {len(df_rfid2.Serial.unique())} seriales únicos en el archivo 2, deberian haber 560, revise el archivo")   
         if df_rfid_join.shape[0] != 560:
             errores+=1
             st.error("Los archivos tienen seriales diferentes, reviselos")
