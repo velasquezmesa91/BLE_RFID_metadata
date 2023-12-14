@@ -168,6 +168,8 @@ with tab3:
             st.dataframe(df_rfid2[df_rfid2.Serial.isin(bad_serials.ID)])
         if errores ==0:
             st.success("Los archivos estan correctos, puede liberar la estiba")
+        else: 
+            st.error(f"Tiene {errores} errores, revise los archivos y vuelva a validarlos")
         
         
 
