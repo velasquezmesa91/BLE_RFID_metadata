@@ -4,7 +4,7 @@ from streamlit import session_state as ss
 import numpy as np
 
 st.title("Chequeos formulario metadatos" )
-tab1, tab2, tab3 = st.tabs(["Chequeo Individual","Chequeo Pares","Chequeo Grupal"])
+tab1, tab2, tab3 = st.tabs(["Chequeo Individual","Chequeo Pares","Solo RFID"])
 bad_serials = pd.read_excel("bad_serials.xlsx")
 with tab1:
     arch1 = st.file_uploader("Cargue el archivo a revisar")
@@ -111,6 +111,44 @@ with tab2:
                 mime='text/csv',
             )
 
+with tab3:
+    arch3 = st.file_uploader("Cargue los dos archivos", accept_multiple_files=True)
+    if arch3:
+        df_rfid1 =pd.read_excel(arch3[0])["Serial"]
+        df_rfid2 = pd.read_excel(arch3[1])["Serial"]
+        df_rfid_join = df_rfid1.merge(df_rfid2, how="inner",on="Serial")
+
+
+        if any(df_rfid1.duplicated()):
+            st.error("Hay un serial duplicado en el archivo 1 revise el archivo")
+            st.dataframe(df_rfid1[df_rfid1.duplicated()])
+        if any(df_rfid2.duplicated()):
+            st.error("Hay un serial duplicado en el archivo 2 revise el archivo")
+            st.dataframe(df_rfid2[df_rfid2.duplicated()])
+        if len(df_rfid1.str.len().unique())>1:
+            st.error("Hay seriales que no corresponden en el archivo 1 a RFID. revise el archivo")
+        if len(df_rfid2.str.len().unique())>1:
+            st.error("Hay seriales que no corresponden en el archivo 2 a RFID. revise el archivo")
+        if df_rfid1.shape[0] != 560:
+            st.error(f"Hay {df_rfid1.shape[0]} seriales en el archivo 1, deberian haber 560, revise el archivo")
+        if df_rfid2.shape[1] != 560:
+            st.error(f"Hay {df_rfid2.shape[0]} seriales en el archivo 2, deberian haber 560, revise el archivo")   
+        if df_rfid_join.shape[0] != 560:
+            st.error("Los archivos tienen seriales diferentes, reviselos")
+        
+        uno_no_en_dos = df_rfid1[~df_rfid1.isin(df_rfid2)]
+        dos_no_en_uno = df_rfid2[~df_rfid2.isin(df_rfid1)]
+        if len(uno_no_en_dos)>0:
+            st.error("Hay Seriales en el archivo uno que no estan en el 2")
+            st.write(f"Seriales en archivo 1 y no en archivo 2: {uno_no_en_dos}")
+        if len(dos_no_en_uno)>0:
+            st.error("Hay Seriales en el archivo dos que no estan en el 1")
+            st.write(f"Seriales en archivo 2 y no en archivo 1: {dos_no_en_uno}")
+        
+
+
+   
+         
 
 
 
