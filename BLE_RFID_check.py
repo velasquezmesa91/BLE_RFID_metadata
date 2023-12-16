@@ -27,12 +27,12 @@ with tab1:
   
     arch1 = st.file_uploader("Cargue el archivo a revisar")
     if arch1:
-        df1 = pd.read_excel(arch1, skiprows=4)
+        df1 = pd.read_excel(arch1, skiprows=4).dropna(subset="Device ID")
         df1 = df1.loc[:,["ID","Device Descr",	"Device ID"]]
         df1.dropna(subset="Device ID", inplace=True)
         rfid = df1[df1["Device Descr"] == "RFID Tag"]
         ble = df1[df1["Device Descr"] == "GPS Device"]
-
+        #st.write(df1.shape)
         BLE_unico = len(ble["Device ID"].unique())
         RFID_unico = len(rfid["Device ID"].unique())
         BLE_duplicado = (ble["Device ID"].value_counts() > 1)
@@ -76,9 +76,10 @@ with tab1:
             
 with tab2:
     arch2 = st.file_uploader("Cargue los dos archivos", accept_multiple_files=True)
+    errores2=0
     if arch2:
-        df_t1 = pd.read_excel(arch2[0], skiprows=4)
-        df_t2 = pd.read_excel(arch2[1], skiprows=4)
+        df_t1 = pd.read_excel(arch2[0], skiprows=4).dropna(subset="Device ID")
+        df_t2 = pd.read_excel(arch2[1], skiprows=4).dropna(subset="Device ID")
         df_t1 = df_t1.loc[:,["ID","Device Descr",	"Device ID"]]
         df_t2 = df_t2.loc[:,["ID","Device Descr",	"Device ID"]]
         df_t1.dropna(subset="Device ID", inplace=True)
@@ -102,8 +103,14 @@ with tab2:
         df22["key"] = df22["GPS Device"] + "--" + df22["RFID Tag"]
 
         df_join = df12.merge(df22, on="key", how="inner",suffixes=["","_R"])
+        df_join2 = df12.merge(df22, on="key", how="outer",suffixes=["","_R"])
+        ind2 = df_join2["GPS Device_R"].isna()
+        ind1 = df_join2["GPS Device"].isna()
 
+        #st.write(any(ind1))
+        #st.write(any(ind1) | any(ind2))
         if tm[0]!=(tam1*2):
+            errores2+=1
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
 
             st.write(f"RFID en archivo 1 y no en 2: {rfid1[~rfid1.isin(rfid2)].unique()}")
@@ -111,11 +118,23 @@ with tab2:
             st.write(f"BLE en archivo 1 y no en 2: {ble1[~ble1.isin(ble2)].unique()}")
             st.write(f"BLE en archivo 2 y no en 1: {ble2[~ble2.isin(ble1)].unique()}")
 
-        elif df_join.shape[0] !=tam1:
+        if df_join.shape[0] !=tam1:
+            errores2+=1
+            df_join.shape[0] 
             st.error("Los archivos tienen diferentes seriales, revise los archivos")
             st.write(f"RFID en archivo 1 y no en 2: {rfid1[~rfid1.isin(rfid2)].values}")
             st.write(f"RFID en archivo 2 y no en 1: {rfid2[~rfid2.isin(rfid1)].values}")
-        else:
+        if any(ind1) | any(ind2):
+            errores2+=1
+            st.error("Hay parejas RFID-BLE diferentes en ambos archivos, vuelva a escanear las siguientes canastillas en ambos archivos")
+            
+            st.write("archivo 1: ")
+            st.dataframe(df_join2.loc[ind2,"key"])
+            st.write("archivo 2: ")
+            st.dataframe(df_join2.loc[ind1,"key"])
+            
+
+        if errores2==0:
             st.success("Ambos archivos estan correctos!")
             @st.cache_data
             def convert_df(df):
@@ -128,6 +147,8 @@ with tab2:
                 file_name=f"SerialesBLE.csv",
                 mime='text/csv',
             )
+        else:
+            st.error(f"Tiene {errores2} errores, revise los archivos")
 
 with tab3:
     arch3 = st.file_uploader("Cargue los dos archivos", accept_multiple_files=True, key="rfid")
