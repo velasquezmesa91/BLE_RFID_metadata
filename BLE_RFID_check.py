@@ -95,6 +95,17 @@ with tab2:
         tm = df12.merge(df22, on="Device ID", how="inner").shape
 
         #Join
+        ind_error12 = df12.ID.value_counts()>2
+        ind_error22 = df22.ID.value_counts()>2
+        if any(ind_error12):
+            st.error(f"Hay un error en el archivo 2, por favor reviselo")
+            st.write("Los siguientes IDs tienen seriales RFID distintos:")
+            st.table(ind_error12[ind_error12].index)
+
+        elif any(ind_error22):
+            st.error(f"Hay un error en el archivo 1, por favor reviselo")
+            st.write("Los siguientes IDs tienen seriales RFID distintos:")
+            st.table(ind_error22[ind_error22].index)
         
         df12 = df12.pivot(index="ID", columns="Device Descr").droplevel(level=0, axis=1)
         df22 = df22.pivot(index="ID", columns="Device Descr").droplevel(level=0, axis=1)
